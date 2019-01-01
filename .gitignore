@@ -1,0 +1,8 @@
+*.o
+*.so
+*.dynlib
+
+.vscode
+.vscode/*
+
+doomfire
