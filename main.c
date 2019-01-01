@@ -23,25 +23,6 @@ static uint8_t color_map[COLOR_MAP_SIZE][RGB_SIZE] = {{07, 07, 07},
     {0xb7, 0xb7, 0x37}, {0xcf, 0xcf, 0x6f}, {0xdf, 0xdf, 0x9f}, {0xef, 0xef, 0xc7}, {0xff, 0xff, 0xff},
 };
 
-static uint8_t 
-*map_color(const int8_t v)
-{
-    uint8_t *rgb = malloc(sizeof(uint8_t) * 3);
-    if (!rgb)
-        return NULL;
-    memset(rgb, 0, sizeof(uint8_t) * 3);
-    if (v < 0 || v >= COLOR_MAP_SIZE - 1) {
-        rgb[0] = 0;
-        rgb[1] = 0;
-        rgb[2] = 0;
-        return rgb;
-    }
-    rgb[0] = color_map[v][0];
-    rgb[1] = color_map[v][1];
-    rgb[2] = color_map[v][2];
-    return rgb;
-}
-
 struct inferno {
     int height;
     int width;
@@ -110,19 +91,22 @@ render(struct inferno *i)
         for (int x = 0; x < i->width; x++) {
             int pos = (y * i->width) + x;
             if (i->grid[pos] != prev) {
-                uint8_t *rgb = map_color(i->grid[pos]);
                 char tbuf[TMP_BUFFER];
-                sprintf(tbuf, "\x1b[48;2;%d;%d;%dm", rgb[0], rgb[1], rgb[2]);
-                free(rgb);
+                if (i->grid[pos] < 0 || i->grid[pos] >= COLOR_MAP_SIZE - 1) {
+                    sprintf(tbuf, "\x1b[48;2;%d;%d;%dm", 0, 0, 0);
+                } else {
+                    sprintf(tbuf, "\x1b[48;2;%d;%d;%dm", 
+                        color_map[i->grid[pos]][0], 
+                        color_map[i->grid[pos]][1], 
+                        color_map[i->grid[pos]][2]);
+                }
                 strcat(buffer, tbuf);
             }
             strcat(buffer, " ");
             prev = i->grid[pos];
         }
     }
-
     printf("%s", buffer);
-    //memset(buffer, 0, MAX_BUFFER);
 
     struct timespec t = {0, 100000000L};
     nanosleep(&t, NULL);
