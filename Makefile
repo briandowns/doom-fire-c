@@ -2,7 +2,7 @@ CC     = cc
 BINARY = doomfire
 
 $(BINARY):
-	$(CC) -o $(BINARY) main.c
+	$(CC) -std=c99 -Wall -o $(BINARY) main.c
 
 .PHONY: clean
 clean:
